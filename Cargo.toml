@@ -1,5 +1,5 @@
 [package]
-name = "lambda_warp"
+name = "warp_lambda"
 version = "0.1.0"
 authors = ["Aslam Ahammed <aslamplr@gmail.com>"]
 edition = "2018"
@@ -7,8 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+lambda_http = { git = "https://github.com/awslabs/aws-lambda-rust-runtime.git", rev = "c36409c5e65f994c7ff48510cd111905b4aa77c9" }
+warp = "0.2.5"
+tower = "0.3.1"
+thiserror = "1.0.21"
+
+[dev-dependencies]
 anyhow = "1.0.33"
 tokio = { version = "0.2", features = [ "full" ]}
-warp = "0.2.5"
-warp_lambda = { path = "./warp_lambda" }
-
