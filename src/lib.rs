@@ -29,7 +29,7 @@ pub enum WarpHandlerError {
     #[error("Warp error: `{0:#?}`")]
     HyperError(#[from] warp::hyper::Error),
     #[error("Unexpected error: `{0:#?}`")]
-    Unexpected(#[from] Error)
+    Unexpected(#[from] Error),
 }
 
 struct WarpHandler<
