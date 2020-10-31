@@ -8,7 +8,7 @@ A super simple crate to let you use [warp filters](https://github.com/seanmonsta
 
 Add `warp_lambda`, `warp` and `tokio` to your dependencies:
 
-> Note: Planning to publish `warp_lambda` crate to crates.io soon. Then the git dependencies won't be necessary.
+> Note: Planning to publish `warp_lambda` crate to crates.io soon once the latest changes to aws-lambda-rust-runtime is released. Then the git dependencies won't be necessary.
 
 ```toml
 tokio = { version = "0.2", features = [ "full" ]}
@@ -38,6 +38,8 @@ async fn main() {
 
 # Deployment
 
+Relevant parts copied over from https://github.com/awslabs/aws-lambda-rust-runtime
+
 #### AWS CLI
 
 To deploy the basic sample as a Lambda function using the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html), we first need to manually build it with [`cargo`](https://doc.rust-lang.org/cargo/). Since Lambda uses Amazon Linux, you'll need to target your executable for an `x86_64-unknown-linux-musl` platform.
@@ -49,7 +51,7 @@ $ rustup target add x86_64-unknown-linux-musl
 
 Compile one of the examples as a _release_ with a specific _target_ for deployment to AWS:
 ```bash
-$ cargo build -p lambda --example hello --release --target x86_64-unknown-linux-musl
+$ cargo build --example hello_world --release --target x86_64-unknown-linux-musl
 ```
 
 For [a custom runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html), AWS Lambda looks for an executable called `bootstrap` in the deployment package zip. Rename the generated `basic` executable to `bootstrap` and add it to a zip archive.
