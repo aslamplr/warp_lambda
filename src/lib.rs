@@ -2,6 +2,9 @@ use core::future::Future;
 use std::convert::Infallible;
 use std::pin::Pin;
 
+pub use lambda_http;
+pub use warp;
+
 use lambda_http::{
     handler,
     lambda::{self, Context},
