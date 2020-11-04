@@ -13,7 +13,7 @@ Add `warp_lambda`, `warp` and `tokio` to your dependencies:
 ```toml
 tokio = { version = "0.2", features = [ "full" ]}
 warp = "0.2"
-warp_lambda = { git = "https://github.com/aslamplr/warp_lambda.git", rev = "944229805436f8af1a4f7bdd113651708dd704d8" }
+warp_lambda = { git = "https://github.com/aslamplr/warp_lambda.git", rev = "4eab5db86da49dcca1f5515a8173765acfcaee0a" }
 ```
 
 And then get started in your `main.rs`:
