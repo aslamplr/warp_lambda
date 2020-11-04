@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
         .and(warp::filters::ext::get::<RequestContext>())
         .map(|name, aws_req_ctx| {
             // Request context is useful for extracting the request-id, or
-            // Authorizer configured with API Gateway such as cognito related jwt 
+            // Authorizer configured with API Gateway such as cognito related jwt
             // Or custom authorizer etc.
             let context = match aws_req_ctx {
                 // Request context when invoked from an ALB event
