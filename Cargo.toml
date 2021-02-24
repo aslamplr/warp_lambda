@@ -8,7 +8,7 @@ homepage = "https://github.com/aslamplr/warp_lambda#warp_lambda"
 version = "0.1.0"
 authors = ["Aslam Ahammed <aslamplr@gmail.com>"]
 edition = "2018"
-keywords = ["lambda", "aws-lambda", "warp", "serverless", "warp-lambda", "warp-filters", "aws"]
+keywords = ["lambda", "aws-lambda", "warp", "serverless", "warp-lambda"]
 categories = ["web-programming", "web-programming::http-server"]
 
 [badges]
