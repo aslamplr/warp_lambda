@@ -2,13 +2,14 @@ use core::future::Future;
 use std::convert::Infallible;
 use std::pin::Pin;
 
-pub use lambda_http;
+pub use netlify_lambda_http as lambda_http;
 pub use warp;
 
-use lambda_http::{
+use aws_lambda_events::encodings::Body as LambdaBody;
+use netlify_lambda_http::{
     handler,
     lambda::{self, Context},
-    Body as LambdaBody, Handler, Request, Response,
+    Handler, Request, Response,
 };
 use warp::hyper::Body as WarpBody;
 
@@ -45,7 +46,7 @@ impl<F> Handler for WarpHandler<F>
 where
     F: tower::Service<WarpRequest, Response = WarpResponse, Error = Infallible> + 'static,
 {
-    type Response = Response<lambda_http::Body>;
+    type Response = Response<LambdaBody>;
     type Error = Error;
     type Fut = WarpHandlerFuture<Self::Response, Self::Error>;
 

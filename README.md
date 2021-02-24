@@ -2,18 +2,19 @@
 
 A super simple crate to let you use [warp filters](https://github.com/seanmonstar/warp) with [aws lambda runtime](https://github.com/awslabs/aws-lambda-rust-runtime)
 
+> Note: Using fork of [awslabs/aws-lambda-rust-runtime](https://github.com/awslabs/aws-lambda-rust-runtime) by Netlify devs [lamedh-dev/aws-lambda-rust-runtime](https://github.com/lamedh-dev/aws-lambda-rust-runtime)
+> Due to issue [#216](https://github.com/awslabs/aws-lambda-rust-runtime/issues/216) and an alternative from Netlify devs [#274](https://github.com/awslabs/aws-lambda-rust-runtime/issues/274)
+
 > `Warning: This is experimental and not production ready! uses non stable version of aws_lambda_rust_runtime`
 
 # Example
 
 Add `warp_lambda`, `warp` and `tokio` to your dependencies:
 
-> Note: Planning to publish `warp_lambda` crate to crates.io soon once the latest changes to aws-lambda-rust-runtime is released. Then the git dependencies won't be necessary.
-
 ```toml
-tokio = { version = "0.2", features = [ "full" ]}
-warp = "0.2"
-warp_lambda = { git = "https://github.com/aslamplr/warp_lambda.git", rev = "4eab5db86da49dcca1f5515a8173765acfcaee0a" }
+tokio = { version = "1.2.0", features = [ "full" ]}
+warp = "0.3"
+warp_lambda = "0.1"
 ```
 
 And then get started in your `main.rs`:

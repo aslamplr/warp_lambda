@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
                 // Request context when invoked from an ALB event
                 RequestContext::Alb(alb) => format!("::ALB:: {:?}", alb),
                 // Request context when invoked from an API Gateway REST event
-                RequestContext::ApiGateway(api_gw) => format!("::API_GW:: {:?}", api_gw),
+                RequestContext::ApiGatewayV1(api_gw) => format!("::API_GW:: {:?}", api_gw),
                 // Request context when invoked from an API Gateway HTTP event
                 RequestContext::ApiGatewayV2(api_gw2) => format!("::API_GW(V2):: {:?}", api_gw2),
             };
