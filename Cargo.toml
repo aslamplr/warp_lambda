@@ -1,10 +1,18 @@
 [package]
 name = "warp_lambda"
+description = "A super simple crate to let you use [warp filters](https://github.com/seanmonstar/warp) with [aws lambda runtime](https://github.com/awslabs/aws-lambda-rust-runtime)"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/aslamplr/warp_lambda"
+homepage = "https://github.com/aslamplr/warp_lambda#warp_lambda"
 version = "0.1.0"
 authors = ["Aslam Ahammed <aslamplr@gmail.com>"]
 edition = "2018"
+keywords = ["lambda", "aws-lambda", "warp", "serverless", "warp-lambda", "warp-filters", "aws"]
+categories = ["web-programming", "web-programming::http-server"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "experimental" }
 
 [dependencies]
 aws_lambda_events = "0.4.0"
