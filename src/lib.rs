@@ -2,11 +2,11 @@ use core::future::Future;
 use std::convert::Infallible;
 use std::pin::Pin;
 
-pub use netlify_lambda_http as lambda_http;
+pub use lamedh_http as lambda_http;
 pub use warp;
 
 use aws_lambda_events::encodings::Body as LambdaBody;
-use netlify_lambda_http::{
+use lamedh_http::{
     handler,
     lambda::{self, Context},
     Handler, Request, Response,
