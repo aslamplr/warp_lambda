@@ -21,6 +21,8 @@ aws_lambda_events = "0.4"
 # in favor of using netlify's fork lamedh-dev/aws-lambda-rust-runtime
 lamedh_http = "0.3"
 lamedh_runtime = "0.3"
+mime = "0.3"
+once_cell = "1.7"
 warp = "0.3"
 tower = "0.4"
 thiserror = "1.0"
