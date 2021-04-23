@@ -63,7 +63,7 @@ async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<
 
     // Attempt to determine the Content-Type
     let content_type: Option<&HeaderValue> = parts.headers.get("Content-Type");
-    let content_encoding: Option<&HeaderValue> = parts.headers.get("Content-EncEncoding");
+    let content_encoding: Option<&HeaderValue> = parts.headers.get("Content-Encoding");
 
     // If Content-Encoding is present, assume compression
     // If Content-Type is not present, don't assume is a string
