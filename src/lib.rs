@@ -2,15 +2,20 @@ use core::future::Future;
 use std::convert::Infallible;
 use std::pin::Pin;
 
-pub use netlify_lambda_http as lambda_http;
+pub use lamedh_http as lambda_http;
 pub use warp;
 
 use aws_lambda_events::encodings::Body as LambdaBody;
-use netlify_lambda_http::{
+use lamedh_http::{
     handler,
     lambda::{self, Context},
     Handler, Request, Response,
 };
+use mime::Mime;
+use once_cell::sync::Lazy;
+use std::collections::HashSet;
+use warp::http::response::Parts;
+use warp::http::HeaderValue;
 use warp::hyper::Body as WarpBody;
 
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
@@ -42,6 +47,42 @@ struct WarpHandler<
 
 type WarpHandlerFuture<Resp, Err> = Pin<Box<dyn Future<Output = Result<Resp, Err>> + 'static>>;
 
+static PLAINTEXT_MIMES: Lazy<HashSet<Mime>> = Lazy::new(|| {
+    vec![
+        mime::APPLICATION_JAVASCRIPT,
+        mime::APPLICATION_JAVASCRIPT_UTF_8,
+        mime::APPLICATION_JSON,
+    ]
+    .into_iter()
+    .collect()
+});
+
+async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<LambdaBody, Error> {
+    // Concatenate all bytes into a single buffer
+    let raw_bytes = warp::hyper::body::to_bytes(warp_body).await?;
+
+    // Attempt to determine the Content-Type
+    let content_type: Option<&HeaderValue> = parts.headers.get("Content-Type");
+    let content_encoding: Option<&HeaderValue> = parts.headers.get("Content-Encoding");
+
+    // If Content-Encoding is present, assume compression
+    // If Content-Type is not present, don't assume is a string
+    let body = if let (Some(typ), None) = (content_type, content_encoding) {
+        let typ = typ.to_str()?;
+        let m = typ.parse::<Mime>()?;
+        if PLAINTEXT_MIMES.contains(&m) || m.type_() == mime::TEXT {
+            Some(String::from_utf8(raw_bytes.to_vec()).map(LambdaBody::Text)?)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    // Not a text response, make binary
+    Ok(body.unwrap_or_else(|| LambdaBody::Binary(raw_bytes.to_vec())))
+}
+
 impl<F> Handler for WarpHandler<F>
 where
     F: tower::Service<WarpRequest, Response = WarpResponse, Error = Infallible> + 'static,
@@ -51,6 +92,7 @@ where
     type Fut = WarpHandlerFuture<Self::Response, Self::Error>;
 
     fn call(&mut self, event: Request, _context: Context) -> Self::Fut {
+        // Convert lambda request to warp request
         let (parts, in_body) = event.into_parts();
         let body = match in_body {
             LambdaBody::Binary(data) => WarpBody::from(data),
@@ -58,12 +100,17 @@ where
             LambdaBody::Empty => WarpBody::empty(),
         };
         let warp_request = WarpRequest::from_parts(parts, body);
+
+        // Call warp service with warp request, save future
         let warp_fut = self.0.call(warp_request);
-        let fut = async {
+
+        // Create lambda future
+        let fut = async move {
             let warp_response = warp_fut.await?;
-            let (parts, res_body) = warp_response.into_parts();
-            let raw_bytes = warp::hyper::body::to_bytes(res_body).await?;
-            let body = LambdaBody::from(raw_bytes.to_vec());
+            let (parts, res_body): (_, _) = warp_response.into_parts();
+
+            let body = warp_body_as_lambda_body(res_body, &parts).await?;
+
             let lambda_response = Response::from_parts(parts, body);
             Ok::<Self::Response, Self::Error>(lambda_response)
         };
