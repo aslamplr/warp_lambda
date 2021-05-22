@@ -91,10 +91,12 @@ where
     type Error = Error;
     type Fut = WarpHandlerFuture<Self::Response, Self::Error>;
 
-    #[tracing::instrument(name = "warp_lambda::call")]
+    #[tracing::instrument(
+        name = "warp_lambda::call",
+        skip(self, event, context),
+        fields(request_id = ?context.request_id)
+    )]
     fn call(&mut self, event: Request, context: Context) -> Self::Fut {
-        let Context { request_id, .. } = context;
-        tracing::info!(?request_id);
         // Convert lambda request to warp request
         let (parts, in_body) = event.into_parts();
         let body = match in_body {
@@ -118,14 +120,5 @@ where
             Ok::<Self::Response, Self::Error>(lambda_response)
         };
         Box::pin(fut)
-    }
-}
-
-impl<F> std::fmt::Debug for WarpHandler<F>
-where
-    F: tower::Service<WarpRequest, Response = WarpResponse, Error = Infallible> + 'static,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", std::any::type_name::<Self>())
     }
 }
