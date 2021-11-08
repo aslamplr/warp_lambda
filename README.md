@@ -2,18 +2,13 @@
 
 A super simple crate to let you use [warp filters](https://github.com/seanmonstar/warp) with [aws lambda runtime](https://github.com/awslabs/aws-lambda-rust-runtime)
 
-> Note: Using fork of [awslabs/aws-lambda-rust-runtime](https://github.com/awslabs/aws-lambda-rust-runtime) by Netlify devs [lamedh-dev/aws-lambda-rust-runtime](https://github.com/lamedh-dev/aws-lambda-rust-runtime)
-> Due to issue [#216](https://github.com/awslabs/aws-lambda-rust-runtime/issues/216) and an alternative from Netlify devs [#274](https://github.com/awslabs/aws-lambda-rust-runtime/issues/274)
-
-> `Warning: This is experimental and not production ready! uses non stable version of aws_lambda_rust_runtime`
-
 # Example
 
 Add `warp_lambda`, `warp` and `tokio` to your dependencies:
 
 ```toml
-tokio = { version = "1.2.0", features = [ "full" ]}
-warp = "0.3"
+tokio = { version = "1.13.0", features = [ "full" ]}
+warp = "0.3.1"
 warp_lambda = "0.1"
 ```
 

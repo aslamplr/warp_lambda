@@ -2,18 +2,17 @@ use core::future::Future;
 use std::convert::Infallible;
 use std::pin::Pin;
 
-pub use lamedh_http as lambda_http;
 pub use warp;
 
-use aws_lambda_events::encodings::Body as LambdaBody;
-use lamedh_http::{
+use lambda_http::{
     handler,
-    lambda::{self, Context},
-    Handler, Request, Response,
+    lambda_runtime::{self, Context},
+    Body, Handler, Request, RequestExt, Response,
 };
 use mime::Mime;
 use once_cell::sync::Lazy;
 use std::collections::HashSet;
+use std::str::FromStr;
 use warp::http::response::Parts;
 use warp::http::HeaderValue;
 use warp::hyper::Body as WarpBody;
@@ -24,7 +23,7 @@ pub async fn run<Svc>(warp_svc: Svc) -> Result<(), WarpHandlerError>
 where
     Svc: tower::Service<WarpRequest, Response = WarpResponse, Error = Infallible> + 'static,
 {
-    lambda::run(handler(WarpHandler(warp_svc))).await?;
+    lambda_runtime::run(handler(WarpHandler(warp_svc))).await?;
     Ok(())
 }
 
@@ -57,7 +56,7 @@ static PLAINTEXT_MIMES: Lazy<HashSet<Mime>> = Lazy::new(|| {
     .collect()
 });
 
-async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<LambdaBody, Error> {
+async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<Body, Error> {
     // Concatenate all bytes into a single buffer
     let raw_bytes = warp::hyper::body::to_bytes(warp_body).await?;
 
@@ -71,7 +70,7 @@ async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<
         let typ = typ.to_str()?;
         let m = typ.parse::<Mime>()?;
         if PLAINTEXT_MIMES.contains(&m) || m.type_() == mime::TEXT {
-            Some(String::from_utf8(raw_bytes.to_vec()).map(LambdaBody::Text)?)
+            Some(String::from_utf8(raw_bytes.to_vec()).map(Body::Text)?)
         } else {
             None
         }
@@ -80,15 +79,15 @@ async fn warp_body_as_lambda_body(warp_body: WarpBody, parts: &Parts) -> Result<
     };
 
     // Not a text response, make binary
-    Ok(body.unwrap_or_else(|| LambdaBody::Binary(raw_bytes.to_vec())))
+    Ok(body.unwrap_or_else(|| Body::Binary(raw_bytes.to_vec())))
 }
 
-impl<F> Handler for WarpHandler<F>
+impl<F> Handler<'_> for WarpHandler<F>
 where
     F: tower::Service<WarpRequest, Response = WarpResponse, Error = Infallible> + 'static,
 {
-    type Response = Response<LambdaBody>;
     type Error = Error;
+    type Response = Response<Body>;
     type Fut = WarpHandlerFuture<Self::Response, Self::Error>;
 
     #[tracing::instrument(
@@ -97,13 +96,22 @@ where
         fields(request_id = ?context.request_id)
     )]
     fn call(&mut self, event: Request, context: Context) -> Self::Fut {
-        // Convert lambda request to warp request
-        let (parts, in_body) = event.into_parts();
-        let body = match in_body {
-            LambdaBody::Binary(data) => WarpBody::from(data),
-            LambdaBody::Text(text) => WarpBody::from(text),
-            LambdaBody::Empty => WarpBody::empty(),
+        let query_params = event.query_string_parameters();
+
+        let (mut parts, body) = event.into_parts();
+        let body = match body {
+            Body::Empty => WarpBody::empty(),
+            Body::Text(t) => WarpBody::from(t.into_bytes()),
+            Body::Binary(b) => WarpBody::from(b),
         };
+
+        let mut uri = format!("http://{}{}", "127.0.0.1", parts.uri.path());
+
+        if !query_params.is_empty() {
+            append_querystring_from_map(&mut uri, query_params.iter());
+        }
+
+        parts.uri = warp::hyper::Uri::from_str(uri.as_str()).or_else(|e| Err(e)).unwrap();
         let warp_request = WarpRequest::from_parts(parts, body);
 
         // Call warp service with warp request, save future
@@ -121,4 +129,16 @@ where
         };
         Box::pin(fut)
     }
+}
+
+fn append_querystring_from_map<'a, I>(uri: &mut String, from_query_params: I)
+where
+    I: Iterator<Item = (&'a str, &'a str)>,
+{
+    uri.push('?');
+    let mut serializer = url::form_urlencoded::Serializer::new(String::new());
+    for (key, value) in from_query_params.into_iter() {
+        serializer.append_pair(key, value);
+    }
+    uri.push_str(serializer.finish().as_str())
 }
