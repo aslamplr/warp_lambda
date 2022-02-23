@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use warp::Filter;
 
-use warp_lambda::lambda_http::request::RequestContext;
+use lambda_http::request::RequestContext;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -18,13 +18,15 @@ async fn main() -> Result<()> {
                 // Request context when invoked from an ALB event
                 RequestContext::Alb(alb) => format!("::ALB:: {:?}", alb),
                 // Request context when invoked from an API Gateway REST event
-                RequestContext::ApiGatewayV1(api_gw) => format!("::API_GW:: {:?}", api_gw),
+                RequestContext::ApiGatewayV1(api_gw1) => format!("::API_GW(V1):: {:?}", api_gw1),
                 // Request context when invoked from an API Gateway HTTP event
                 RequestContext::ApiGatewayV2(api_gw2) => format!("::API_GW(V2):: {:?}", api_gw2),
+                // Request context when invoked from a WebSocket event
+                RequestContext::WebSocket(ws) => format!("::WebSocket:: {:?}", ws),
             };
             format!("Hello {}! request context for debug {}", name, context)
         });
-    // Convert them to a warp service (a tower service implmentation)
+    // Convert them to a warp service (a tower service implementation)
     // using `warp::service()`
     let warp_service = warp::service(a_route);
     // The warp_lambda::run() function takes care of invoking the aws lambda runtime for you
