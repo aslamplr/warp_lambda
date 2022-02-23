@@ -18,11 +18,11 @@ async fn main() -> Result<()> {
         .with(warp::log("warp_lambda::tracing::test"))
         .with(warp::trace::request());
 
-    // Convert them to a warp service (a tower service implmentation)
+    // Convert them to a warp service (a tower service implementation)
     // using `warp::service()`
     let warp_service = warp::service(routes);
     // The warp_lambda::run() function takes care of invoking the aws lambda runtime for you
     warp_lambda::run(warp_service)
         .await
-        .map_err(|err| anyhow!("An error occured `{:#?}`", err))
+        .map_err(|err| anyhow!("An error occurred `{:#?}`", err))
 }

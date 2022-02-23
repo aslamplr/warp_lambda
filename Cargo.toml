@@ -15,11 +15,8 @@ categories = ["web-programming", "web-programming::http-server"]
 maintenance = { status = "experimental" }
 
 [dependencies]
-aws_lambda_events = "0.4"
-# Reference issue https://github.com/awslabs/aws-lambda-rust-runtime/issues/274 
-# for the reason to move away from official awslabs/aws-lambda-rust-runtime
-# in favor of using netlify's fork lamedh-dev/aws-lambda-rust-runtime
-lamedh_http = "0.3"
+lambda_http = "0.5"
+url = "2.2"
 mime = "0.3"
 once_cell = "1.7"
 warp = "0.3"
