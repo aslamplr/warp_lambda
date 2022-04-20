@@ -1,3 +1,5 @@
 /target
 Cargo.lock
 test_headers.txt
+*.zip
+.DS_Store
