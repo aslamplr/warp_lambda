@@ -7,7 +7,7 @@ repository = "https://github.com/aslamplr/warp_lambda"
 homepage = "https://github.com/aslamplr/warp_lambda#warp_lambda"
 version = "0.1.3"
 authors = ["Aslam Ahammed <aslamplr@gmail.com>"]
-edition = "2018"
+edition = "2021"
 keywords = ["lambda", "aws-lambda", "warp", "serverless", "warp-lambda"]
 categories = ["web-programming", "web-programming::http-server"]
 
